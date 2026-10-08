@@ -5,7 +5,7 @@
   function parse(raw) {
     var site = { info: {}, series: [], cv: [] };
     var mode = 'info', cur = null, sec = null, inNote = false, blank = false;
-    var KEYS = ['제목', '연도', '폴더', '노트', '사진'];
+    var KEYS = ['제목', '연도', '폴더', '노트', '영문노트', '사진'];
     String(raw || '').split(/\r?\n/).forEach(function (line) {
       var t = line.trim();
       if (!t) { blank = true; return; }
@@ -31,14 +31,16 @@
       if (KEYS.indexOf(key) < 0) {
         /* 항목 이름이 없는 줄은 바로 위 노트에 이어 붙입니다. 빈 줄 뒤에서는 새 문단이 됩니다. */
         if (inNote) {
-          if (blank || !cur.notes.length) cur.notes.push(t);
-          else cur.notes[cur.notes.length - 1] += '\n' + t;
+          var blk = cur.notes[cur.notes.length - 1];
+          if (blank || !blk.length) blk.push(t);
+          else blk[blk.length - 1] += '\n' + t;
           blank = false;
         }
         return;
       }
-      inNote = key === '노트'; blank = false;
-      if (key === '노트') { if (val) cur.notes.push(val); }
+      inNote = key === '노트' || key === '영문노트'; blank = false;
+      /* 노트(또는 영문노트) 줄 하나가 한 단이 됩니다. 두 번 쓰면 두 단으로 나란히 놓입니다. */
+      if (inNote) { cur.notes.push(val ? [val] : []); }
       else if (key === '사진') {
         var f = val.split('|').map(function (s) { return s.trim(); });
         var r = f[0].match(/^(.*?)(\d+)(\.\w+)\s*~\s*.*?(\d+)(?:\.\w+)?$/);
@@ -161,14 +163,31 @@
     ]));
 
     if (n) {
-      var img = el('img', { alt: '' });
+      var stage = el('div', { class: 'stage' });
       var cap = el('figcaption', { class: 'small' });
-      wrap.appendChild(el('figure', { class: 'slide' }, [img, cap]));
+      wrap.appendChild(el('figure', { class: 'slide' }, [stage, cap]));
+      var cur = null;
+      var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var show = function (k) {
-        i = Math.max(0, Math.min(n - 1, k));
+        k = Math.max(0, Math.min(n - 1, k));
+        if (cur && k === i) return;
+        var dir = k > i ? 1 : -1;
+        i = k;
         var p = s.photos[i];
-        img.src = src(s.folder, p.file);
-        img.alt = p.title || ((s.title || '') + ' ' + (i + 1));
+        var img = el('img', { src: src(s.folder, p.file), alt: p.title || ((s.title || '') + ' ' + (i + 1)), draggable: 'false' });
+        var old = cur; cur = img;
+        if (old && !calm) {
+          /* 새 사진은 넘기는 방향에서 밀려 들어오고, 이전 사진은 반대쪽으로 밀려 나갑니다 */
+          img.style.transform = 'translateX(' + (dir * 100) + '%)'; img.style.opacity = '0';
+          stage.appendChild(img);
+          img.getBoundingClientRect();
+          img.style.transform = ''; img.style.opacity = '';
+          old.style.transform = 'translateX(' + (-dir * 100) + '%)'; old.style.opacity = '0';
+          setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 600);
+        } else {
+          if (old && old.parentNode) old.parentNode.removeChild(old);
+          stage.appendChild(img);
+        }
         cap.textContent = '';
         var l1 = [p.title, p.year].filter(Boolean).join(', ');
         var l2 = [p.medium, p.size].filter(Boolean).join(', ');
@@ -181,14 +200,14 @@
       };
       prevB.addEventListener('click', function () { show(i - 1); });
       nextB.addEventListener('click', function () { show(i + 1); });
-      /* 사진의 왼쪽 절반을 누르면 이전, 오른쪽 절반을 누르면 다음 */
-      img.addEventListener('click', function (e) {
-        var r = img.getBoundingClientRect();
+      /* 사진 틀의 왼쪽 절반을 누르면 이전, 오른쪽 절반을 누르면 다음 */
+      stage.addEventListener('click', function (e) {
+        var r = stage.getBoundingClientRect();
         show(e.clientX - r.left < r.width / 2 ? i - 1 : i + 1);
       });
-      img.addEventListener('mousemove', function (e) {
-        var r = img.getBoundingClientRect();
-        img.style.cursor = n < 2 ? 'default' : (e.clientX - r.left < r.width / 2 ? 'w-resize' : 'e-resize');
+      stage.addEventListener('mousemove', function (e) {
+        var r = stage.getBoundingClientRect();
+        stage.style.cursor = n < 2 ? 'default' : (e.clientX - r.left < r.width / 2 ? 'w-resize' : 'e-resize');
       });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft') show(i - 1);
@@ -196,8 +215,8 @@
       });
       /* 휴대폰에서는 좌우로 밀어서 넘깁니다 */
       var x0 = null;
-      img.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
-      img.addEventListener('touchend', function (e) {
+      stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+      stage.addEventListener('touchend', function (e) {
         if (x0 === null) return;
         var dx = e.changedTouches[0].clientX - x0; x0 = null;
         if (Math.abs(dx) > 40) { e.preventDefault(); show(dx < 0 ? i + 1 : i - 1); }
@@ -205,15 +224,10 @@
       show(0);
     }
 
-    if (s.notes.length) wrap.appendChild(el('div', { class: 'series-note' }, s.notes.map(function (t) { return el('p', { text: t }); })));
-    if (site.series.length > 1) {
-      var m = site.series.length;
-      var prev = site.series[(idx - 1 + m) % m], next = site.series[(idx + 1) % m];
-      wrap.appendChild(el('nav', { class: 'series-nav', 'aria-label': '시리즈 이동' }, [
-        el('a', { href: seriesUrl(prev), text: '이전 시리즈: ' + (prev.title || prev.folder) }),
-        el('a', { href: seriesUrl(next), text: '다음 시리즈: ' + (next.title || next.folder) })
-      ]));
-    }
+    var blocks = s.notes.filter(function (b) { return b.length; });
+    if (blocks.length) wrap.appendChild(el('div', { class: 'series-note' + (blocks.length > 1 ? ' cols' : '') }, blocks.map(function (b) {
+      return el('div', {}, b.map(function (t) { return el('p', { text: t }); }));
+    })));
     main.appendChild(wrap);
   }
 
