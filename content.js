@@ -8,13 +8,13 @@ window.SITE_CONTENT = String.raw`
 
 [기본정보]
 이름: 안예찬
-영문이름: Yechan An
-소개: 2000년 용인 출생, 서울에서 활동
-이메일: cpatain1214@naver.com
-인스타그램: an_yechan
+Name: Yechan An
+소개: 2000년 용인 출생, 서울에서 활동 / Born in Yongin(2000), Working in Seoul
+E-mail: cpatain1214@naver.com
+Instagram: an_yechan
 
 // 메인 화면에 크게 나오는 대표 이미지 한 장 (폴더이름/파일이름)
-메인이미지: series-1/01.jpg
+메인이미지: series-2/16.jpg
 
 
 // ─────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ window.SITE_CONTENT = String.raw`
 // ─────────────────────────────────────────────────────────
 
 [시리즈]
-제목: 사해
+제목: 사해, Dead see
 연도: 2026
 폴더: series-1
 노트: 해변의 조개껍데기들은 오랫동안 아름다운 수집품으로 소비되어 왔다. 상체를 푹 숙여 그중에 가장 하얗거나, 크고 매끄러운 조개시체를 조개 밭에서 신중히 골라 집어든다. 껍데기에 보름달 모양으로 예쁘게 뚫려있는 구멍은 마치 목걸이로 엮어 달라는 듯 보인다. 그리고 우리는 구멍이 포식의 흔적임에는 크게 관심이 없다.
@@ -96,7 +96,7 @@ Death is everywhere, wherever we turn our gaze.
 
 
 [시리즈]
-제목: 돌고 来
+제목: 돌고 来, Fractal Mandala
 연도: 2025
 폴더: series-3
 노트: 영국의 해안선의 길이는 몇 km 일까? 이 질문에서 프랙털 이론은 시작된다.  
@@ -156,7 +156,7 @@ Perhaps what endlessly turns and returns is the very essence of the universe.
 사진: 03.jpg
 
 [시리즈]
-제목: 석류 石流
+제목: 석류 石流, Flowing Stones
 연도: 2024~2025
 폴더: series-2
 노트: 모든 생명은 성장과 생장의 과정을 통해 양분을 얻고 쓰임을 다하며 시간 속을 흘러간다.
@@ -229,7 +229,9 @@ The stories contained within these traces are ultimately nothing more than the i
 
 [CV]
 # 학력 / Education
-2025~ | 석사 재학, 사진, 홍익대학교 일반대학원, 서울
+2025~ | 석사 재학 중, 사진전공, 홍익대학교 일반대학원, 서울
+2025  | 졸업, 사진영상미디어과, 신구대학교, 성남 
+
 
 # 단체전 / Group Exhibitions
 2023 | 《RE START》, 마루아트센터, 서울
@@ -240,4 +242,19 @@ The stories contained within these traces are ultimately nothing more than the i
 2025 | 《Post Photo》, 홍익대학교, 서울
 2026 | 《비-중》, 갤러리 오, 서울
 2026 | 《그리고 벼을》, 갤러리 71, 서울
+
+[CV]
+# Education
+2025~ | Currently enrolled in the Master’s program, Photography, Hongik University Graduate School, Seoul
+2025  | Graduated, Department of Photography and Image Media, Shingu University, Seongnam
+
+# Group Exhibitions
+2023 | 《RE START》, Maru Art Center, Seoul
+2024 | 《Dear My Color》, Space Lora, Seoul
+2024 | 《Aside》, Gallery IS, Seoul
+2025 | 《Times of the Untitled》, Ha Gallery, Seoul
+2025 | 《Korea Photo Festival》, aT Center, Yangjae, Seoul
+2025 | 《Post Photo》, Hongik University, Seoul
+2026 | 《Bi-Jung》, Gallery O, Seoul
+2026 | 《Geurigo Byeoeul》, Gallery 71, Seoul
 `;
