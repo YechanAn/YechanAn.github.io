@@ -71,7 +71,22 @@
     (children || []).forEach(function (c) { if (c) n.appendChild(c); });
     return n;
   }
-  function src(folder, file) { return 'images/' + encodeURI(folder) + '/' + encodeURI(file); }
+  /* 사진 위치: 먼저 images 폴더 안에서 찾고, 없으면 images 없이 바로 시리즈 폴더에서 찾습니다 */
+  var base = 'images/';
+  function src(folder, file) { return base + encodeURI(folder) + '/' + encodeURI(file); }
+  function photo(folder, file, attrs) {
+    attrs.src = src(folder, file);
+    var img = el('img', attrs);
+    if (base) {
+      var retry = function () {
+        img.removeEventListener('error', retry);
+        img.addEventListener('load', function () { base = ''; }, { once: true });
+        img.src = encodeURI(folder) + '/' + encodeURI(file);
+      };
+      img.addEventListener('error', retry);
+    }
+    return img;
+  }
   function seriesUrl(s) { return 'series.html?s=' + encodeURIComponent(s.folder); }
 
   var contentMissing = typeof window.SITE_CONTENT !== 'string';
@@ -83,19 +98,18 @@
   try { currentFolder = new URLSearchParams(location.search).get('s'); } catch (e) {}
   if (page === 'series' && !currentFolder && site.series[0]) currentFolder = site.series[0].folder;
 
-  /* 왼쪽 메뉴 */
+  /* 왼쪽 메뉴: 세 줄 기호는 메인 화면으로 가는 버튼이고, 메뉴는 항상 펼쳐져 있습니다 */
   function buildSide() {
     var side = document.getElementById('side');
-    var narrow = window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
-    var btn = el('button', { type: 'button', class: 'menu-btn', 'aria-label': '메뉴 열기 또는 닫기', 'aria-expanded': String(!narrow), 'aria-controls': 'menu' });
-    btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M2 6h20M2 12h20M2 18h20"/></svg>';
+    var home = el('a', { href: 'index.html', class: 'menu-btn', 'aria-label': '메인 화면으로' });
+    home.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M2 6h20M2 12h20M2 18h20"/></svg>';
 
     var sub = el('ul', { class: 'submenu', id: 'works-list' }, site.series.map(function (s) {
       var isCur = page === 'series' && s.folder === currentFolder;
       return el('li', {}, [el('a', { href: seriesUrl(s), text: s.title || s.folder, class: isCur ? 'current' : '', 'aria-current': isCur ? 'page' : false })]);
     }));
     sub.hidden = page !== 'series';
-    var worksBtn = el('button', { type: 'button', text: 'Works', class: page !== 'cv' ? 'current' : '', 'aria-expanded': String(!sub.hidden), 'aria-controls': 'works-list' });
+    var worksBtn = el('button', { type: 'button', text: 'Works', class: page === 'series' ? 'current' : '', 'aria-expanded': String(!sub.hidden), 'aria-controls': 'works-list' });
     worksBtn.addEventListener('click', function () {
       sub.hidden = !sub.hidden;
       worksBtn.setAttribute('aria-expanded', String(!sub.hidden));
@@ -105,14 +119,8 @@
       el('li', {}, [worksBtn, sub]),
       el('li', {}, [el('a', { href: 'cv.html', text: 'CV', class: page === 'cv' ? 'current' : '', 'aria-current': page === 'cv' ? 'page' : false })])
     ]);
-    var nav = el('nav', { id: 'menu', 'aria-label': '주 메뉴' }, [menu]);
-    nav.hidden = narrow;
-    btn.addEventListener('click', function () {
-      nav.hidden = !nav.hidden;
-      btn.setAttribute('aria-expanded', String(!nav.hidden));
-    });
-    side.appendChild(btn);
-    side.appendChild(nav);
+    side.appendChild(home);
+    side.appendChild(el('nav', { 'aria-label': '주 메뉴' }, [menu]));
   }
 
   function buildFooter() {
@@ -125,6 +133,7 @@
 
   /* 메인 화면: 대표 이미지 한 장 */
   function buildHome(main) {
+    main.classList.add('home');
     document.title = name + (info['영문이름'] ? ' ' + info['영문이름'] : '');
     var path = info['메인이미지'] || '';
     var s = null, file = '';
@@ -137,11 +146,10 @@
       s = site.series[0]; file = s.photos[0].file;
     }
     if (!s || !file) { main.appendChild(notice('content.js 파일의 "메인이미지" 줄에 대표 이미지를 적어 주세요. 예) 메인이미지: series-1/01.jpg')); return; }
-    var img = el('img', { src: src(s.folder, file), alt: (s.title || name) + ' 대표 이미지' });
+    var img = photo(s.folder, file, { alt: (s.title || name) + ' 대표 이미지' });
     var cap = el('div', { class: 'cap-row small' }, [el('span', { text: s.title || '' }), el('span', { text: s.year || '' })]);
     var fig = el('figure', { class: 'home-figure' }, [img, cap]);
     main.appendChild(s.external ? fig : el('a', { href: seriesUrl(s), 'aria-label': (s.title || '시리즈') + ' 보기' }, [fig]));
-    if (!s.external) { main.firstChild.style.display = 'inline-block'; main.firstChild.style.maxWidth = '100%'; }
   }
 
   /* 시리즈 상세: 사진을 한 장씩 넘겨 봅니다 */
@@ -174,7 +182,7 @@
         var dir = k > i ? 1 : -1;
         i = k;
         var p = s.photos[i];
-        var img = el('img', { src: src(s.folder, p.file), alt: p.title || ((s.title || '') + ' ' + (i + 1)), draggable: 'false' });
+        var img = photo(s.folder, p.file, { alt: p.title || ((s.title || '') + ' ' + (i + 1)), draggable: 'false' });
         var old = cur; cur = img;
         if (old && !calm) {
           /* 새 사진은 넘기는 방향에서 밀려 들어오고, 이전 사진은 반대쪽으로 밀려 나갑니다 */

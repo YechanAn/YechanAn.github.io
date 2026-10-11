@@ -202,25 +202,25 @@ These traces may hold memories that are joyful even to think about, or memories 
 Yet because all of them are traces, I can do nothing but look at them.
 
 The stories contained within these traces are ultimately nothing more than the imagination of the present looking back upon the past.
-사진: 석류_1.jpg
-사진: 석류_2.jpg
-사진: 석류_3.jpg
-사진: 석류_4.jpg
-사진: 석류_5.jpg
-사진: 석류_6.jpg
-사진: _MG_1580.jpg
-사진: _MG_2632.jpg
-사진: _MG_2752.jpg
-사진: _MG_2762.jpg
-사진: _MG_2764.jpg
-사진: _MG_2768.jpg
-사진: 포폴_세이브존1.jpg
-사진: 포폴_세이브존3.jpg
-사진: 포폴_평택3.jpg
-사진: 석류복사_web.jpg
-사진: 석류복사촬1.jpg
-사진: 석류복사촬2.jpg
-사진: 석류복사촬3.jpg
+사진: 01.jpg
+사진: 02.jpg
+사진: 03.jpg
+사진: 04.jpg
+사진: 05.jpg
+사진: 06.jpg
+사진: 07.jpg
+사진: 08.jpg
+사진: 09.jpg
+사진: 10.jpg
+사진: 11.jpg
+사진: 12.jpg
+사진: 13.jpg
+사진: 14.jpg
+사진: 15.jpg
+사진: 16.jpg
+사진: 17.jpg
+사진: 18.jpg
+사진: 19.jpg
 
 // ─────────────────────────────────────────────────────────
 // CV. "# 제목 / 영문 제목" 줄이 구분 제목이고, 그 아래는 "연도 | 내용" 입니다.
